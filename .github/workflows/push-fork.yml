@@ -124,7 +124,7 @@ jobs:
             exit 0
           fi
           cat "$log"
-          body=$(tail -c 30000 "$log" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
+          body=$({ grep -E 'error|Error|ERROR|What went wrong|FAILURE|Exception|^e: ' "$log" | head -n 40; echo '-----'; tail -n 40 "$log"; } | cut -c 1-300 | head -c 3500 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
           echo "::error title=$title failed::$body"
           exit 1
           EOF
