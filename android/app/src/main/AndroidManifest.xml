@@ -87,6 +87,16 @@
         <meta-data
             android:name="dev.imranr.obtainium.service.NOTIFICATION_ICON"
             android:resource="@drawable/ic_notification" />
+        <service
+            android:name="dev.imranr.obtainium.PushTriggerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.unifiedpush.android.connector.PUSH_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name="org.unifiedpush.flutter.connector.UnifiedPushService"
+            tools:node="remove" />
     </application>
     <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
     <uses-feature android:name="android.hardware.touchscreen.multitouch" android:required="false"/>

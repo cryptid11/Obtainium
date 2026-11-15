@@ -2,7 +2,7 @@
 
 import 'main.dart' as m;
 
-void main() {
+void main(List<String> args) {
   m.isFdroidBuild = true;
-  m.main();
+  m.main(args);
 }

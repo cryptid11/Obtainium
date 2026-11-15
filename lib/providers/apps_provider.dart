@@ -30,6 +30,7 @@ import 'package:obtainium/providers/apps_provider_lifecycle.dart';
 import 'package:obtainium/providers/apps_provider_updates.dart';
 
 import 'package:obtainium/utils/bg_update_guards.dart';
+import 'package:obtainium/utils/push_payload.dart';
 import 'package:obtainium/utils/signing_cert_utils.dart';
 import 'package:obtainium/utils/translation_loader.dart';
 
@@ -1072,6 +1073,21 @@ Future<void> bgUpdateCheck(
   await appsProvider.loadApps();
   await appsProvider.settingsProvider.initializeSettings();
 
+  final pushPayload = params[pushPayloadParam];
+  if (pushPayload is String) {
+    final matchedIds = matchPushPayload(
+      pushPayload,
+      appsProvider.apps.map((id, app) => MapEntry(id, app.app.url)),
+    );
+    if (matchedIds.isEmpty) {
+      AppLogger.info('BG push task: No app matches "$pushPayload", ignoring.');
+      return;
+    }
+    AppLogger.info('BG push task: "$pushPayload" matched $matchedIds.');
+    params = pushCheckParams(matchedIds);
+  }
+  final isPushRun = params[pushInstallParam] == true;
+
   final netResult = await (Connectivity().checkConnectivity());
   if (netResult.contains(ConnectivityResult.none) ||
       netResult.isEmpty ||
@@ -1080,7 +1096,7 @@ Future<void> bgUpdateCheck(
     return;
   }
 
-  if (appsProvider.settingsProvider.updateInterval == 0) {
+  if (appsProvider.settingsProvider.updateInterval == 0 && !isPushRun) {
     if (!forceAll) {
       AppLogger.info(
         'BG update task: Skipped (enabled=${appsProvider.settingsProvider.enableBackgroundUpdates}, '
@@ -1153,6 +1169,7 @@ Future<void> bgUpdateCheck(
       toCheck,
       appsProvider,
       notificationsProvider,
+      isPushRun: isPushRun,
     );
 
     final List<App> trackOnlyToNotify = [];
@@ -1207,10 +1224,11 @@ Future<void> bgUpdateCheck(
   }
   if (canInstall &&
       appsProvider.settingsProvider.enableBackgroundUpdates &&
-      params['toCheck'] == null) {
-    final discovered = appsProvider.findAppIdsWithPendingUpdates(
-      installedOnly: true,
-    );
+      (params['toCheck'] == null || isPushRun)) {
+    final checkedIds = toCheck.map((e) => e.key).toSet();
+    final discovered = appsProvider
+        .findAppIdsWithPendingUpdates(installedOnly: true)
+        .where((id) => !isPushRun || checkedIds.contains(id));
     final existing = silentlyInstallable.toSet();
     for (final id in discovered) {
       if (existing.contains(id)) continue;
@@ -1224,7 +1242,7 @@ Future<void> bgUpdateCheck(
       'BG install task: Found ${silentlyInstallable.length} apps to install (${existing.length} from checks, ${silentlyInstallable.length - existing.length} pre-existing).',
     );
   }
-  if (canInstall && params['toCheck'] == null) {
+  if (canInstall && (params['toCheck'] == null || isPushRun)) {
     await _runBGInstallMode(
       silentlyInstallable,
       appsProvider,
@@ -1242,8 +1260,9 @@ _bgRunUpdateCheck(
   String taskId,
   List<MapEntry<String, int>> toCheck,
   AppsProvider appsProvider,
-  NotificationsProvider notificationsProvider,
-) async {
+  NotificationsProvider notificationsProvider, {
+  bool isPushRun = false,
+}) async {
   AppLogger.info('BG update task: Started (${toCheck.length}).');
 
   List<App> updates = [];
@@ -1329,6 +1348,7 @@ _bgRunUpdateCheck(
         'toCheck': toRetry
             .map((entry) => {'key': entry.key, 'value': entry.value})
             .toList(),
+        if (isPushRun) pushInstallParam: true,
       },
     );
   } else {

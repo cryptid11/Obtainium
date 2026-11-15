@@ -10,6 +10,7 @@ import 'package:obtainium/core/logging/app_logger.dart';
 import 'package:obtainium/providers/notifications_provider.dart';
 import 'package:obtainium/providers/settings_provider.dart';
 import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainium/services/push_trigger.dart';
 import 'package:obtainium/utils/native_features.dart';
 import 'package:obtainium/pages/home.dart';
 import 'package:obtainium/theme.dart';
@@ -93,7 +94,7 @@ void callbackDispatcher() {
   });
 }
 
-void main() async {
+void main([List<String> args = const []]) async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLogger.init();
 
@@ -117,6 +118,12 @@ void main() async {
       message: 'Uncaught framework error',
     );
   };
+
+  if (args.contains(pushTriggerBackgroundArg)) {
+    await Workmanager().initialize(callbackDispatcher);
+    await PushTrigger.start(SettingsProvider(), background: true);
+    return;
+  }
 
   final settingsProvider = SettingsProvider();
   final sourceProvider = SourceProvider();
@@ -166,6 +173,7 @@ void main() async {
 
   await Workmanager().initialize(callbackDispatcher);
   AppLogger.info('WorkManager initialised');
+  unawaited(PushTrigger.start(settingsProvider));
 
   runApp(
     MultiProvider(

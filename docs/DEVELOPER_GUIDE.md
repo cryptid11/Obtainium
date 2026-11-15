@@ -597,6 +597,43 @@ Background work is scheduled via **`workmanager`** (Android periodic tasks). The
    instance can detect background writes and reload automatically. Errors during
    background tasks are caught and logged rather than crashing the headless process.
 
+### Push-triggered update checks (`services/push_trigger.dart`)
+
+Optional and off by default (Settings → Updates → *Push-triggered update checks*).
+Obtainium registers as a [UnifiedPush](https://unifiedpush.org) client through
+`unifiedpush_android` + `unifiedpush_platform_interface`; the user's distributor app
+(e.g. ntfy) provides an endpoint URL, stored in `SettingsProvider.pushTriggerEndpoint`
+and shown with a copy button. A release workflow then `POST`s the app's package ID,
+source URL, or GitHub `owner/repo` to that endpoint.
+
+1. `PushTrigger.start()` (from `main()`) re-registers on every app start while the
+   feature is on. `enable()` picks a distributor (`tryUseCurrentOrDefaultDistributor`,
+   then a picker if several are installed) and registers; `disable()` unregisters.
+2. A message does no network work itself: `_onMessage` validates the payload and
+   enqueues a one-off WorkManager task with `inputData: {pushPayload: <payload>}`
+   (constraints follow the "do nothing" background guards, so the task waits for
+   Wi-Fi/charging instead of being dropped).
+3. `bgUpdateCheck` resolves the payload with `matchPushPayload()`
+   (`utils/push_payload.dart`, pure and unit-tested): exact package ID first, else a
+   case-insensitive URL match (scheme, `www.`, query, trailing `/` and `.git` ignored;
+   deeper paths such as release pages match their app; the longest app URL wins;
+   all apps sharing that URL match). No match → logged and ignored.
+4. Matched IDs run as a normal `toCheck` pass with `pushInstall: true`, which (unlike
+   plain retries) lets the pass install silently-installable results, including a
+   pending update for those apps found by an earlier check. `updateInterval == 0` does
+   not block push runs; the background guards, `enableBackgroundUpdates`, and per-app
+   exemptions still apply. Retries keep the `pushInstall` flag.
+
+When the process is not running, the plugin starts a headless Flutter engine that runs
+`main(['--unifiedpush-bg'])`; `main()` then only initializes WorkManager and the push
+callbacks (no `runApp`). The plugin's own service only does this when no plugin
+instance was ever created in the process, so a message arriving while the process is
+cached after a WorkManager run would wait until the app is next opened.
+`PushTriggerService` (Kotlin, replaces the plugin's service in the manifest) instead
+starts an engine whenever no Dart side is listening (`Plugin.calls.subscriptionCount`),
+destroying the previous one it started. Reading that flow is why the app module has a
+`compileOnly` kotlinx-coroutines dependency.
+
 ### Update checking (`apps_provider_updates.dart`)
 
 - **`fetchUpdate(appId)`** fetches new metadata **without saving**;

@@ -675,6 +675,33 @@ class SettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool get pushTriggerEnabled {
+    return _getBool('pushTriggerEnabled') ?? false;
+  }
+
+  set pushTriggerEnabled(bool val) {
+    prefs?.setBool('pushTriggerEnabled', val);
+    notifyListeners();
+  }
+
+  String? get pushTriggerEndpoint {
+    return _getString('pushTriggerEndpoint');
+  }
+
+  set pushTriggerEndpoint(String? val) {
+    if (val == null) {
+      prefs?.remove('pushTriggerEndpoint');
+    } else {
+      prefs?.setString('pushTriggerEndpoint', val);
+    }
+    notifyListeners();
+  }
+
+  Future<void> reloadFromDisk() async {
+    await prefs?.reload();
+    notifyListeners();
+  }
+
   bool get enableCertificatePinning {
     return _getBool('enableCertificatePinning') ?? false;
   }

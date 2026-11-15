@@ -10,6 +10,7 @@ import 'package:obtainium/components/category_editor.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:obtainium/components/ui_widgets.dart';
 import 'package:obtainium/components/generated_form_renderer.dart';
+import 'package:obtainium/components/push_trigger_settings.dart';
 import 'package:obtainium/custom_errors.dart';
 import 'package:obtainium/core/logging/app_logger.dart';
 import 'package:obtainium/installers/root_installer.dart';
@@ -677,6 +678,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ],
       ],
+      ...pushTriggerSettingsTiles(context),
       SectionHeader(tr('updateChecks'), padding: _settingsSectionPadding),
       _settingsRow(
         context,

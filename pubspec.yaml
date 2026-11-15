@@ -72,6 +72,8 @@ dependencies:
   flutter_charset_detector: ^6.0.0
   flutter_markdown_plus: ^1.0.12
   workmanager: ^0.10.10
+  unifiedpush_android: ^3.5.0
+  unifiedpush_platform_interface: ^4.0.0
   logger: ^2.8.0
 
 dev_dependencies:
