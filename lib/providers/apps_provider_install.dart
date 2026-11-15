@@ -1207,6 +1207,7 @@ extension AppsProviderInstall on AppsProvider {
       id == obtainiumId ||
       id == obtainiumTempId ||
       id == '$obtainiumId.fdroid' ||
+      id == '$obtainiumId.push' ||
       id == '$obtainiumId.debug';
 
   /// Downloads APKs for [appIds] and installs them, silently when possible.
@@ -1247,6 +1248,7 @@ extension AppsProviderInstall on AppsProvider {
       strB: obtainiumTempId,
     );
     appsToInstall = moveStrToEnd(appsToInstall, '$obtainiumId.fdroid');
+    appsToInstall = moveStrToEnd(appsToInstall, '$obtainiumId.push');
     appsToInstall = moveStrToEnd(appsToInstall, '$obtainiumId.debug');
 
     final List<_InstallResult> obtainiumResults = [];
