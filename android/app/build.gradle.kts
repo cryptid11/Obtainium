@@ -136,6 +136,13 @@ android.applicationVariants.configureEach {
 }
 
 
+configurations.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("com.google.crypto.tink:tink"))
+            .using(module("com.google.crypto.tink:tink-android:1.23.0"))
+    }
+}
+
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")

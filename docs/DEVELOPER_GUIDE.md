@@ -634,6 +634,12 @@ starts an engine whenever no Dart side is listening (`Plugin.calls.subscriptionC
 destroying the previous one it started. Reading that flow is why the app module has a
 `compileOnly` kotlinx-coroutines dependency.
 
+The UnifiedPush connector depends on the JVM `com.google.crypto.tink:tink`, which pulls in
+full `protobuf-java` and clashes with the `protobuf-javalite` already in the app
+("Duplicate class com.google.protobuf..."). `android/app/build.gradle.kts` substitutes
+`tink-android` (same API, bundles its own shaded protobuf); keep its version in step
+with the one the connector requests.
+
 ### Update checking (`apps_provider_updates.dart`)
 
 - **`fetchUpdate(appId)`** fetches new metadata **without saving**;
