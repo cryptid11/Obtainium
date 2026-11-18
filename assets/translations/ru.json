@@ -429,6 +429,7 @@
     "pushTriggeredChecks": "Push-triggered update checks",
     "pushTriggeredChecksHelp": "When a push message names one of your apps, Obtainium checks only that app right away and then installs the update according to your background update settings. This needs a UnifiedPush distributor app, such as ntfy.",
     "pushTriggeredChecksPayloadHelp": "Send the app's package ID or its source URL as the message body to the endpoint shown below. For GitHub, 'owner/repo' also works. Anyone who knows the endpoint can trigger update checks, so keep it private.",
+    "pushUpdates": "Push updates",
     "randomColour": "Случайный цвет",
     "rawJson": "Исходный JSON",
     "refresh": "Обновить",

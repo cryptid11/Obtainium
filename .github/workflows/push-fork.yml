@@ -60,6 +60,8 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config merge.fork-keys.name 'Merge translations and pubspec.lock by key'
+          git config merge.fork-keys.driver 'node tool/fork_merge_driver.mjs %O %A %B %P'
           git remote add upstream "$UPSTREAM_REPO"
           git fetch --no-tags upstream main
           if ! git push origin upstream/main:refs/heads/main; then
@@ -82,7 +84,7 @@ jobs:
             reason="forced"
           elif [ -z "$last" ]; then
             reason="no previous release"
-          elif ! git diff --quiet "$last" HEAD -- . ':(exclude).github' ':(exclude)FORK.md'; then
+          elif ! git diff --quiet "$last" HEAD -- . ':(exclude).github' ':(exclude).gitattributes' ':(exclude)FORK.md' ':(exclude)tool/fork_merge_driver*'; then
             reason="changes since $last"
           else
             echo "Nothing changed since $last; not releasing."
@@ -147,6 +149,9 @@ jobs:
 
       - name: Analyze
         run: '"$RUNNER_TEMP/run.sh" "flutter analyze" flutter analyze'
+
+      - name: Merge helper tests
+        run: '"$RUNNER_TEMP/run.sh" "merge helper tests" node --test tool/fork_merge_driver.test.mjs'
 
       - name: Unit tests
         run: '"$RUNNER_TEMP/run.sh" "flutter test" flutter test'

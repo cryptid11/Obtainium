@@ -678,7 +678,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ],
       ],
-      ...pushTriggerSettingsTiles(context),
       SectionHeader(tr('updateChecks'), padding: _settingsSectionPadding),
       _settingsRow(
         context,
@@ -921,7 +920,11 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: AppSpacings.connectedGap,
-      children: shapeCardTiles(children),
+      children: shapeCardTiles([
+        ...children,
+        SectionHeader(tr('pushUpdates'), padding: _settingsSectionPadding),
+        ...pushTriggerSettingsTiles(context),
+      ]),
     );
   }
 

@@ -18,9 +18,11 @@ working as usual. The feature is off by default (Settings → Updates →
 `.github/workflows/push-fork.yml` runs daily (and on demand from the Actions tab):
 
 1. fast-forwards `main` to `upstream/main`;
-2. merges `main` into `push`. On a conflict the run fails and GitHub emails you; merge
-   `upstream/main` into `push` locally, resolve, and push;
-3. if anything outside `.github/` and `FORK.md` changed since the last release (or the run
+2. merges `main` into `push`. Translation files and `pubspec.lock` are merged key by key
+   (`tool/fork_merge_driver.mjs`, enabled through `.gitattributes`), so upstream edits next
+   to the fork's entries do not conflict. On a real conflict the run fails and GitHub emails
+   you; merge `upstream/main` into `push` locally, resolve, and push;
+3. if the app itself changed since the last release (or the run
    was started with *force*), it runs the formatter, analyzer and unit tests, builds a
    signed release APK and publishes it as a GitHub Release;
 4. if the `OBTAINIUM_PUSH_URL` secret is set, it sends this repo's URL to that endpoint so
