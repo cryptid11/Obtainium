@@ -36,12 +36,12 @@ jobs:
     steps:
       - name: Check secrets
         env:
-          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+          SYNC_DEPLOY_KEY: ${{ secrets.SYNC_DEPLOY_KEY }}
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
           missing=""
-          [ -n "$SYNC_TOKEN" ] || missing="$missing SYNC_TOKEN"
+          [ -n "$SYNC_DEPLOY_KEY" ] || missing="$missing SYNC_DEPLOY_KEY"
           [ -n "$KEYSTORE_BASE64" ] || missing="$missing KEYSTORE_BASE64"
           [ -n "$KEYSTORE_PASSWORD" ] || missing="$missing KEYSTORE_PASSWORD"
           if [ -n "$missing" ]; then
@@ -53,7 +53,7 @@ jobs:
         with:
           ref: push
           fetch-depth: 0
-          token: ${{ secrets.SYNC_TOKEN }}
+          ssh-key: ${{ secrets.SYNC_DEPLOY_KEY }}
 
       - name: Sync main with upstream and merge it into push
         id: merge

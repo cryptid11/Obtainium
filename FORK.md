@@ -42,7 +42,7 @@ upstream's values.
 | --- | --- |
 | `KEYSTORE_BASE64` | The release keystore (PKCS#12), base64-encoded on one line |
 | `KEYSTORE_PASSWORD` | Its password (also the key password; key alias `obtainium-push`) |
-| `SYNC_TOKEN` | Fine-grained personal access token for this repo only, with **Contents: read and write** and **Workflows: read and write**. Needed because upstream commits can change workflow files, which the built-in token may not push. |
+| `SYNC_DEPLOY_KEY` | Private key (OpenSSH) of a deploy key on this repo with write access. The sync pushes `main` and `push` with it, because upstream commits can change workflow files, which the built-in token may not push. |
 | `OBTAINIUM_PUSH_URL` | Optional. The push endpoint shown in the app. |
 
 The workflow refuses to publish an APK that is not signed by the expected certificate
