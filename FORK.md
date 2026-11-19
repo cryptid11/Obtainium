@@ -63,11 +63,17 @@ Use the package ID when one repo publishes several apps and you only want to upd
 
 **Option A (recommended): last step of the workflow that creates the release.**
 
+Give it the same `if:` as the release step. It does nothing while the secret is unset, and
+a push failure does not fail the release.
+
 ```yaml
       - name: Tell Obtainium about the release
+        continue-on-error: true
         env:
           OBTAINIUM_PUSH_URL: ${{ secrets.OBTAINIUM_PUSH_URL }}
-        run: curl -fsS -d "https://github.com/${{ github.repository }}" "$OBTAINIUM_PUSH_URL"
+        run: |
+          [ -n "$OBTAINIUM_PUSH_URL" ] || exit 0
+          curl -fsS -d "https://github.com/${{ github.repository }}" "$OBTAINIUM_PUSH_URL"
 ```
 
 **Option B: a separate workflow** (`.github/workflows/notify-obtainium.yml`). It waits until
